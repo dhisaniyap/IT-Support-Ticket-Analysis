@@ -1,0 +1,186 @@
+# Import Libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load Dataset
+data = pd.read_csv("customer_support_tickets.csv")
+df = pd.DataFrame(data)
+
+# Basic Data Inspection
+print(df.head())
+print(df.shape)
+print(df.info())
+print(df.isnull().sum())
+print(df.duplicated().sum())
+
+# Standardize Column Names
+df.columns = (df.columns.str.lower().str.strip().str.replace(' ', '_'))
+
+# Convert Date Columns
+df['date_of_purchase'] = pd.to_datetime(df['date_of_purchase'])
+df['first_response_time'] = pd.to_datetime(df['first_response_time'])
+df['time_to_resolution'] = pd.to_datetime(df['time_to_resolution'])
+
+# Standardize Categorical Values
+cat = df.select_dtypes(include='object')
+
+for c in cat:
+  df[c] = df[c].str.lower().str.strip()
+
+# Explore Categorical Columns
+for c in ['customer_gender','product_purchased','ticket_type','ticket_subject','ticket_status','ticket_priority','ticket_channel']:
+  print(f"\n------------- {c} -------------")
+  print(df[c].value_counts())
+
+# Product Category Mapping
+category_map = {
+# TV
+'lg smart tv': 'TV',
+'sony 4k hdr tv': 'TV',
+'lg oled': 'TV',
+
+# Mobile
+'iphone': 'Mobile',
+'google pixel': 'Mobile',
+'samsung galaxy': 'Mobile',
+'sony xperia': 'Mobile',
+
+# Laptop
+'macbook pro': 'Laptop',
+'dell xps': 'Laptop',
+'hp pavilion': 'Laptop',
+'lenovo thinkpad': 'Laptop',
+'asus rog': 'Laptop',
+
+# Camera
+'canon eos': 'Camera',
+'canon dslr camera': 'Camera',
+'gopro hero': 'Camera',
+'gopro action camera': 'Camera',
+'nikon d': 'Camera',
+
+# Software
+'microsoft office': 'Software',
+'autodesk autocad': 'Software',
+'adobe photoshop': 'Software',
+
+# Smart Home
+'philips hue lights': 'Smart Home',
+'nest thermostat': 'Smart Home',
+'amazon echo': 'Smart Home',
+'google nest': 'Smart Home',
+
+# Wearables
+'fitbit versa smartwatch': 'Wearables',
+'fitbit charge': 'Wearables',
+'garmin forerunner': 'Wearables',
+
+# Home Appliances
+'dyson vacuum cleaner': 'Home Appliances',
+'roomba robot vacuum': 'Home Appliances',
+'lg washing machine': 'Home Appliances',
+
+# Gaming
+'nintendo switch': 'Gaming',
+'nintendo switch pro controller': 'Gaming',
+'microsoft xbox controller': 'Gaming',
+'sony playstation': 'Gaming',
+'xbox': 'Gaming',
+'playstation': 'Gaming',
+
+# E-Reader
+'amazon kindle': 'E-Reader',
+
+# Audio
+'apple airpods': 'Audio',
+'bose quietcomfort': 'Audio',
+'samsung soundbar': 'Audio',
+'bose soundlink speaker': 'Audio',
+
+# Tablet
+'microsoft surface': 'Tablet'
+}
+
+# Create Product Category Column
+df['product_category'] = df['product_purchased'].map(category_map)
+
+# Standardize Ticket Status
+df['ticket_status'] = df['ticket_status'].replace(
+'pending customer response',
+'pending'
+)
+
+# Check Unmapped Products
+print(df[df['product_category'].isnull()]['product_purchased'].unique())
+
+# Analyze Missing Values for Closed Tickets
+for i in ['resolution','first_response_time','time_to_resolution','customer_satisfaction_rating']:
+  print(f"Total null in {i}:",(df[df['ticket_status'] == 'closed'])[i].isnull().sum())
+
+# Fill Missing Resolution Values
+df['resolution'] = df['resolution'].fillna('not resolved yet')
+
+# Analyze Missing Values for Pending Tickets
+for i in ['first_response_time','time_to_resolution','customer_satisfaction_rating']:
+  print(f"Total null in {i}:",(df[df['ticket_status'] == 'pending'])[i].isnull().sum())
+
+# Analyze Missing Values for Open Tickets
+for i in ['first_response_time','time_to_resolution','customer_satisfaction_rating']:
+  print(f"Total null in {i}:",(df[df['ticket_status'] == 'open'])[i].isnull().sum())
+
+# Create Resolution Delay Column
+df.loc[df['ticket_status'] == 'closed','resolution_delay_hours'] = ((df['time_to_resolution']- df['first_response_time']).dt.total_seconds() / 3600)
+
+# Remove Negative Resolution Delays
+df.loc[df['resolution_delay_hours'] < 0,'resolution_delay_hours'] = np.nan
+
+# Round Resolution Delay
+df['resolution_delay_hours'] = (df['resolution_delay_hours'].round(1))
+
+# Create Time-Based Features
+df['response_hour'] = df['first_response_time'].dt.hour
+df['response_day'] = df['first_response_time'].dt.day_name()
+
+# Exploratory Data Analysis
+
+# Resolution Delay by Ticket Priority
+sns.barplot(
+x='ticket_priority',
+y='resolution_delay_hours',
+data=df
+)
+plt.show()
+
+# Customer Satisfaction by Gender
+sns.barplot(
+x='customer_gender',
+y='customer_satisfaction_rating',
+data=df
+)
+plt.show()
+
+# Ticket Count by Product Category
+sns.countplot(
+x='product_category',
+data=df
+)
+plt.xticks(rotation=45)
+plt.show()
+
+# Load Data into MySQL
+from sqlalchemy import create_engine
+
+engine = create_engine(
+'mysql+pymysql://root:Root%40123@localhost/ticket_analysis'
+)
+
+df.to_sql(
+name='tickets',
+con=engine,
+if_exists='replace',
+index=False
+)
+
+print("Data loaded successfully")
