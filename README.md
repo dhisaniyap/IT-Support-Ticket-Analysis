@@ -96,15 +96,21 @@ An interactive dashboard was created in Power BI to visualize operational KPIs a
 
 # Key Insights
 
-1. Gaming and Camera products generated the highest number of customer issues.
+1. Gaming and Camera products generated the highest number of support tickets, likely because hardware products are more prone to physical damage, compatibility issues, and technical failures.
 
-2. Refund requests and technical issues were the most common ticket types.
+2. Most customer issues were related to:
 
-3. Only 32.7% of tickets were successfully closed, indicating a high number of active and pending tickets.
+* Refund requests
+* Technical issues
 
-4. Most tickets were resolved within 24 hours, showing SLA compliance.
+3. Medium-priority tickets were the most common because most customer issues were related to refund requests and common technical problems rather than critical system failures.
 
-5. Phone support channel showed comparatively faster resolution performance than other channels.
+4. Only around 32.7% of tickets were fully resolved, indicating a large number of active and pending tickets.
+
+5. Average resolution delay was approximately 8 hours, showing that most customer issues were resolved within 24 hours and support operations generally remained within SLA limits.
+
+6. Most ticket resolutions occurred during evening hours, especially around 7 PM.
+
 
 # Conclusion
 
