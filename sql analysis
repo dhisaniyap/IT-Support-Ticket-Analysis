@@ -1,0 +1,246 @@
+CREATE DATABASE ticket_analysis;
+USE ticket_analysis;
+
+SELECT *
+FROM tickets;
+
+-- 1. What is the total number of tickets?
+SELECT COUNT(*)
+FROM tickets;
+
+-- 2. How many tickets are there in each ticket status?
+SELECT ticket_status,
+COUNT(*) AS ticket
+FROM tickets
+GROUP BY ticket_status
+ORDER BY ticket DESC;
+
+-- 3. Which ticket priority occurs the most?
+SELECT ticket_priority,
+COUNT(*) AS tot
+FROM tickets
+GROUP BY ticket_priority
+ORDER BY tot DESC;
+
+-- 4. Which ticket channel receives the most complaints?
+SELECT ticket_channel,
+COUNT(*) AS tot
+FROM tickets
+GROUP BY ticket_channel
+ORDER BY tot DESC;
+
+-- 5. Which ticket type occurs most frequently?
+SELECT ticket_type,
+COUNT(*) AS tot
+FROM tickets
+GROUP BY ticket_type
+ORDER BY tot DESC;
+
+-- 6. How many tickets are open, pending, and closed?
+SELECT ticket_status,
+COUNT(*) AS tot
+FROM tickets
+GROUP BY ticket_status;
+
+-- 7. What is the trend of tickets over time?
+SELECT MONTH(first_response_time) AS month_num,
+MONTHNAME(first_response_time) AS month,
+COUNT(*) AS ticket
+FROM tickets
+GROUP BY MONTH(first_response_time),
+MONTHNAME(first_response_time)
+ORDER BY month_num;
+
+-- 8. Which months received the highest number of tickets?
+SELECT MONTHNAME(date_of_purchase),
+COUNT(*) AS ticket
+FROM tickets
+GROUP BY MONTHNAME(date_of_purchase)
+ORDER BY ticket DESC;
+
+-- 9. Which product category has the highest number of issues?
+SELECT product_category,
+COUNT(*) AS issu
+FROM tickets
+GROUP BY product_category
+ORDER BY issu DESC;
+
+-- 10. Which individual product has the most tickets?
+SELECT product_purchased,
+COUNT(*) AS ticket
+FROM tickets
+GROUP BY product_purchased
+ORDER BY ticket DESC
+LIMIT 1;
+
+-- 11. Which product category has the most pending tickets?
+SELECT product_category,
+COUNT(*) AS pending
+FROM tickets
+WHERE ticket_status='pending'
+GROUP BY product_category
+ORDER BY pending DESC;
+
+-- 12. Which gender raises more tickets?
+SELECT customer_gender,
+COUNT(*) AS ticket
+FROM tickets
+GROUP BY customer_gender
+ORDER BY ticket DESC;
+
+-- 13. What is the average customer age by product category?
+SELECT product_category,
+ROUND(AVG(customer_age)) AS avg_age
+FROM tickets
+GROUP BY product_category;
+
+-- 14. What percentage of tickets are closed successfully?
+SELECT ROUND(
+(COUNT(*)/(SELECT COUNT(*) FROM tickets))*100,
+2
+) AS percent_closed
+FROM tickets
+WHERE ticket_status='closed';
+
+-- 15. How many tickets have invalid resolution delays?
+SELECT COUNT(*)
+FROM tickets
+WHERE ticket_status='closed'
+AND resolution_delay_hours IS NULL;
+
+-- 16. What is the average resolution delay for each ticket priority?
+SELECT ticket_priority,
+ROUND(AVG(resolution_delay_hours),2) AS avg_time
+FROM tickets
+GROUP BY ticket_priority;
+
+-- 17. Which priority level takes the longest to resolve?
+SELECT ticket_priority,
+ROUND(AVG(resolution_delay_hours)) AS tot
+FROM tickets
+GROUP BY ticket_priority
+ORDER BY tot DESC;
+
+-- 18. Which product category has the highest average resolution delay?
+SELECT product_category,
+ROUND(AVG(resolution_delay_hours)) AS avg_time
+FROM tickets
+GROUP BY product_category
+ORDER BY avg_time DESC;
+
+-- 19. What is the average resolution delay by product category?
+SELECT product_category,
+ROUND(AVG(resolution_delay_hours),2) AS avg_time
+FROM tickets
+GROUP BY product_category
+ORDER BY avg_time DESC;
+
+-- 20. Which ticket channel has the fastest average resolution delay?
+SELECT ticket_channel
+FROM
+(
+SELECT ticket_channel,
+AVG(resolution_delay_hours) AS avg_time
+FROM tickets
+GROUP BY ticket_channel
+ORDER BY avg_time
+LIMIT 1
+) t;
+
+-- 21. Which day/month had the highest number of resolved tickets?
+SELECT response_day,
+COUNT(*) AS solved_ticket
+FROM tickets
+WHERE ticket_status='closed'
+GROUP BY response_day
+ORDER BY solved_ticket DESC;
+
+-- 22. Which ticket types lead to the longest delays?
+SELECT ticket_type,
+ROUND(AVG(resolution_delay_hours),2) AS avg_delay
+FROM tickets
+GROUP BY ticket_type
+ORDER BY avg_delay DESC;
+
+-- 23. How many tickets were resolved within 24 hours?
+SELECT COUNT(*) AS hr
+FROM tickets
+WHERE resolution_delay_hours <= 24;
+
+-- 24. Which product category has the highest customer satisfaction rating?
+SELECT product_category
+FROM
+(
+SELECT product_category,
+ROUND(AVG(customer_satisfaction_rating),2) AS rating
+FROM tickets
+GROUP BY product_category
+ORDER BY rating DESC
+LIMIT 1
+) t;
+
+-- 25. Which categories receive the lowest customer ratings?
+SELECT product_category,
+ROUND(AVG(customer_satisfaction_rating),2) AS rating
+FROM tickets
+GROUP BY product_category
+ORDER BY rating ASC;
+
+-- 26. What is the average customer satisfaction rating by ticket priority?
+SELECT ticket_priority,
+ROUND(AVG(customer_satisfaction_rating),2) AS avg_rating
+FROM tickets
+GROUP BY ticket_priority;
+
+-- 27. Which ticket priority has the highest average delay?
+SELECT ticket_priority,
+ROUND(AVG(resolution_delay_hours),2) AS avg_time
+FROM tickets
+GROUP BY ticket_priority
+ORDER BY avg_time DESC;
+
+
+SQL Insights:
+
+1. Ticket Status Analysis
+There are still a large number of open and pending tickets, indicating unresolved customer issues.
+
+2. Product Issue Analysis
+Gaming and Camera product categories received the highest number of customer issues.
+Canon EOS camera generated the highest number of support tickets among individual products.
+
+3. Ticket Priority Analysis
+Most tickets were categorized as medium priority.
+High-priority issues generally required more resolution time.
+Critical-priority tickets were resolved faster compared to other priorities due to escalation handling.
+
+4. Support Channel Analysis
+Email was the most commonly used support channel.
+Phone support channel showed comparatively faster ticket resolution performance.
+
+5. Ticket Type Analysis
+Refund requests and technical issues were the most common ticket types.
+Technical issues generally required longer resolution time.
+
+6. Resolution & SLA Analysis
+Only 32.7% of tickets were successfully closed.
+Most tickets were resolved within 24 hours, indicating SLA compliance.
+Average resolution delay was approximately 8 hours.
+
+7. Product Performance Analysis
+Home appliance-related issues required more time to resolve.
+Hardware-related products generally took longer to resolve compared to software-related products.
+Camera products maintained relatively higher customer satisfaction despite receiving more tickets.
+
+8. Customer Analysis
+Male customers raised slightly more tickets.
+Average customer age was around 40 years.
+Low-priority customers showed slightly higher satisfaction ratings.
+
+9. Time-Based Analysis
+June recorded the highest number of tickets.
+Most tickets were resolved on Thursdays.
+Most ticket resolutions occurred around evening hours, especially near 7 PM.
+
+10. Customer Satisfaction Analysis
+Tablet-related products received comparatively lower customer ratings.
