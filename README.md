@@ -2,7 +2,7 @@
 
 # Overview
 
-This project focuses on analyzing customer support ticket data using Python, SQL, MySQL, and Power BI to identify customer issue trends, support performance, ticket resolution efficiency, and SLA-related insights.
+This project focuses on analyzing customer support ticket data using Python, SQL, and Power BI to identify customer issue trends, support performance, ticket resolution efficiency, and SLA-related insights.
 
 The project follows an end-to-end analytics workflow including:
 
@@ -108,7 +108,7 @@ An interactive dashboard was created in Power BI to visualize operational KPIs a
 
 # Conclusion
 
-This project demonstrates a complete end-to-end data analytics workflow using Python, SQL, MySQL, and Power BI.
+This project demonstrates a complete end-to-end data analytics workflow using Python, SQL, and Power BI.
 
 The analysis helped identify:
 
